@@ -1,0 +1,6 @@
+*.log
+env
+session
+*.session
+*.session-journal
+data

@@ -206,9 +206,12 @@ class BebekTod:
             if choice == "2":
                 while True:
                     list_countdown = []
+                    if not os.path.exists("session"):
+                        os.makedirs("session")
                     sessions = glob("session/*.session")
                     start = int(time.time())
                     for no, session in enumerate(sessions):
+                        self.cookie = None
                         print("~" * 50)
                         self.log(f"{hijau}account number : {putih}{no + 1}")
                         data_telegram = self.telegram_login(
@@ -245,7 +248,7 @@ class BebekTod:
 
     def get_me(self):
         url = "https://tgames-duck.bcsocial.net/panel/users/getUser"
-        headers = self.base_headers
+        headers = self.base_headers.copy()
         headers["cookie"] = self.cookie
         data = json.dumps({})
         headers["content-length"] = str(len(data))
@@ -274,7 +277,7 @@ class BebekTod:
                 "amount": amount,
             }
         )
-        headers = self.base_headers
+        headers = self.base_headers.copy()
         headers["cookie"] = self.cookie
         headers["content-length"] = str(len(data))
         res = self.http(url, headers, data)
@@ -287,7 +290,7 @@ class BebekTod:
         captcha = data_captcha.replace("=", "")
         result = eval(captcha)
         url = "https://tgames-duck.bcsocial.net/panel/users/verifyCapcha"
-        headers = self.base_headers
+        headers = self.base_headers.copy()
         headers["cookie"] = self.cookie
         data = json.dumps(
             {
@@ -302,7 +305,7 @@ class BebekTod:
 
     def login(self, data):
         url = "https://tgames-duck.bcsocial.net/panel/users/login"
-        _headers = self.base_headers
+        _headers = self.base_headers.copy()
         data = json.dumps(data, separators=(",", ":"))
         res = self.http(url, _headers, data)
         if "Please try again later" in res.text:
@@ -316,7 +319,7 @@ class BebekTod:
         for cookie in res.cookies.get_dict().items():
             key, value = cookie
             string_cookie += f"{key}={value}; "
-
+            
         self.cookie = string_cookie
         balance = res.json()["data"]["balance"]
         next_claim = res.json()["data"]["nextClaimTime"]

@@ -109,6 +109,8 @@ class BebekTod:
     def telegram_login(self, phone, return_data=False):
         gemod = GeMod()
         session_path = "session"
+        if not os.path.exists(session_path):
+            os.makedirs(session_path)
         model, system_version = gemod.generate_model()
         client = TelegramClient(
             f"{session_path}/{phone}",
@@ -206,9 +208,12 @@ class BebekTod:
             if choice == "2":
                 while True:
                     list_countdown = []
-                    if not os.path.exists("session"):
-                        os.makedirs("session")
+ 
                     sessions = glob("session/*.session")
+                    if len(sessions) <= 0:
+                        self.log(f'{kuning}0 account detected !')
+                        self.log(f'{kuning}add account first or copy your available session to session folder')
+                        sys.exit()
                     start = int(time.time())
                     for no, session in enumerate(sessions):
                         self.cookie = None

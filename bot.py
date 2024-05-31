@@ -88,10 +88,18 @@ class GeMod:
             return res
 
 
+class Config:
+    def __init__(self, api_id, api_hash):
+        self.api_id = api_id
+        self.api_hash = api_hash
+
+
 class BebekTod:
     def __init__(self):
         self.cookie = None
         self.peer = "FirstDuck_bot"
+        self.DEFAULT_APIID = 6
+        self.DEFAULT_APIHASH = 'eb06d4abfb49dc3eeb1aeb98ae0f581e'
         self.base_headers = {
             "accept": "application/json, text/plain, */*",
             "user-agent": "Mozilla/5.0 (Linux; Android 10; Redmi 4A / 5A Build/QQ3A.200805.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/86.0.4240.185 Mobile Safari/537.36",
@@ -106,7 +114,7 @@ class BebekTod:
             "accept-language": "en,en-US;q=0.9",
         }
 
-    def telegram_login(self, phone, return_data=False):
+    def telegram_login(self, phone, config: Config, return_data=False):
         gemod = GeMod()
         session_path = "session"
         if not os.path.exists(session_path):
@@ -114,8 +122,8 @@ class BebekTod:
         model, system_version = gemod.generate_model()
         client = TelegramClient(
             f"{session_path}/{phone}",
-            api_id=6,
-            api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e",
+            api_id=config.api_id,
+            api_hash=config.api_hash,
             device_model=model,
             app_version="10.12.0 (4710)",
             system_lang_code="en-US",
@@ -126,7 +134,6 @@ class BebekTod:
         if not client.is_user_authorized():
             try:
                 res = client.send_code_request(phone)
-                print(res)
                 code = input("input login code : ")
                 client.sign_in(phone, code)
             except SessionPasswordNeededError:
@@ -179,15 +186,18 @@ class BebekTod:
     
     {hijau}By: {putih}t.me/AkasakaID
     {hijau}Github: {putih}@AkasakaID
-    
-    {putih}Login Telegram Version !
         """
         while True:
             arg = sys.argv
             if "noclear" not in arg:
                 os.system("cls" if os.name == "nt" else "clear")
             print(banner)
-
+            config = json.loads(open("config.json", "r").read())
+            cfg = Config(config["api_id"], config["api_hash"])
+            if len(cfg.api_id) == 0:
+                cfg.api_id = self.DEFAULT_APIID
+            if len(cfg.api_hash) == 0:
+                cfg.api_hash = self.DEFAULT_APIHASH
             print(
                 """
     1. Create Session
@@ -208,19 +218,23 @@ class BebekTod:
             if choice == "2":
                 while True:
                     list_countdown = []
- 
+
                     sessions = glob("session/*.session")
                     if len(sessions) <= 0:
-                        self.log(f'{kuning}0 account detected !')
-                        self.log(f'{kuning}add account first or copy your available session to session folder')
+                        self.log(f"{kuning}0 account detected !")
+                        self.log(
+                            f"{kuning}add account first or copy your available session to session folder"
+                        )
                         sys.exit()
+                    total_account = len(sessions)
+                    self.log(f'{hijau}account detected : {total_account} ')
                     start = int(time.time())
                     for no, session in enumerate(sessions):
                         self.cookie = None
                         print("~" * 50)
                         self.log(f"{hijau}account number : {putih}{no + 1}")
                         data_telegram = self.telegram_login(
-                            Path(session).stem, return_data=True
+                            phone=Path(session).stem, config=cfg, return_data=True
                         )
                         res_parser = self.data_parsing(data_telegram)
                         data_login = self.gen_data_login(res_parser)
@@ -237,7 +251,7 @@ class BebekTod:
                             if res_me > 30:
                                 list_countdown.append(res_me)
                                 break
-                            
+
                             self.countdown(res_me)
                     end = int(time.time())
                     if len(list_countdown) > 1:
@@ -245,10 +259,10 @@ class BebekTod:
                         total = (end - start) - min_countdown
                         if total <= 0:
                             continue
-                    
+
                         self.countdown(min_countdown)
                         continue
-                    
+
                     self.countdown(list_countdown[0])
 
     def get_me(self):
@@ -303,10 +317,9 @@ class BebekTod:
             }
         )
         headers["content-length"] = str(len(data))
-        res = self.http(url,headers,data)
+        res = self.http(url, headers, data)
         if "ok" in res.text:
-            self.log(f'{hijau}success bypass captcha !')
-        
+            self.log(f"{hijau}success bypass captcha !")
 
     def login(self, data):
         url = "https://tgames-duck.bcsocial.net/panel/users/login"
@@ -324,7 +337,7 @@ class BebekTod:
         for cookie in res.cookies.get_dict().items():
             key, value = cookie
             string_cookie += f"{key}={value}; "
-            
+
         self.cookie = string_cookie
         balance = res.json()["data"]["balance"]
         next_claim = res.json()["data"]["nextClaimTime"]
@@ -333,7 +346,7 @@ class BebekTod:
         level = res.json()["data"]["level"]
         self.log(f"{hijau}login as : {putih}{first_name} {last_name}")
         if "capcha" in res.json()["data"].keys():
-            if res.json()['data']['capcha'] != "":
+            if res.json()["data"]["capcha"] != "":
                 self.log(f"{kuning}captcha detected")
                 self.bypas_captcha(res.json()["data"]["capcha"])
 

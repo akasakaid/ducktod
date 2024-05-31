@@ -211,7 +211,7 @@ class BebekTod:
 
             if choice == "1":
                 phone = input("input telegram phone number : ")
-                self.telegram_login(phone)
+                self.telegram_login(phone,cfg)
                 input("press enter to continue")
                 continue
 

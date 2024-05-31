@@ -138,7 +138,7 @@ class BebekTod:
                 client.sign_in(phone, code)
             except SessionPasswordNeededError:
                 password_2fa = input("input password 2fa : ")
-                client.sign_in(phone, password_2fa)
+                client.sign_in(password=password_2fa)
 
         me = client.get_me()
         first_name = me.first_name

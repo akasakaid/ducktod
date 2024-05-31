@@ -6,7 +6,7 @@ Auto Tap-tap for bebek bot / firstduck bot
 
 - [x] Auto Tap
 - [x] Bypass Captcha
-- [x] Using random device for initConnection
+- [x] Using random device for [initConnection](https://core.telegram.org/method/initConnection)
 
 # Register
 

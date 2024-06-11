@@ -67,7 +67,7 @@ class GeMod:
             _os = re.search(r"\d+", os.text.split(",")[0]).group()
             os = self.sdk_level_api[_os]
             return device_name, os
-        except AttributeError:
+        except (AttributeError,KeyError):
             return False
 
     def generate_model(self):
